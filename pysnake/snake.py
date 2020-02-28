@@ -10,30 +10,42 @@ import numpy as np
 # PySnake modules
 from pysnake.utils import one_hot_direction
 
+# Snake Game
 from pysnake.vision import FullVision
 from pysnake.enum import Direction, Item
 from pysnake.grid import Cell
+# Neural Network
+from pysnake.nn.mlp import MLP
+# Genetic Algo
+from pysnake.gen.individual import Individual
+from pysnake.gen.chromosome import Chromosome
 
 
-
-class Snake:
+class Snake(Individual):
     
     def __init__(self, game, 
-                 length = 3, 
+                 chromosomes = None,
+                 nn_hidden_layers = [20, 12],
+                 nn_params = None,
+                 length = 4, 
                  vision_max_length = None, 
-                 vision_mode = 16, 
-                 vision_type = "distance"):
+                 vision_mode = 8, 
+                 vision_type = "distance", **kwargs):
         
         # The snake can't live without a game !
         self.game = game
         
-        # Attributes
         self.length = length
+        self.vision_mode = vision_mode
         self.vision_type = vision_type
         self.direction = Direction.UP
         self.body = self._create_snake()
         self.bearing = self._get_bearing()
         self.tail_direction = self.get_tail_direction()
+        
+        # Stats
+        self.score = 0
+        self.lifespan = 0
   
         # Vision
         head = self.body[-1]
@@ -41,23 +53,65 @@ class Snake:
         vision_max_length = None  
         self.full_vision = FullVision(game.grid, head, angle, vision_max_length, vision_mode)
         
-        # Brain input
-        self.X = self._compute_input()
-        self.model = None
-        self.Y = None
+        # Neural Network
+        self.nn_hidden_layers = nn_hidden_layers
+        self.nn_layers_dimension = [self.vision_mode*3 + 4*2] + list(self.nn_hidden_layers) + [4]
+        params = self.decode_chromosomes(chromosomes) if chromosomes is not None else nn_params
+        self.nn = MLP(self.nn_layers_dimension, params=params)
+        self.nn_params = self.nn.params
         
-        # Stats
-        self.score = 0
-        self.lifespan = 0
-                
+        # Create chromosomes from the MLP's weights and bias
+        chromosomes = self.encode_chromosomes()
+        super().__init__(chromosomes, **kwargs)
+                        
         
+    # -------------------------------------------------------------------------
+    # Re-definition from Individual methods
+        
+    def encode_chromosomes(self):
+        chromosomes = []
+        for (key, param) in self.nn.params.items():
+            chromosome = Chromosome(param.reshape(param.size), id=key, enable_crossover=True)
+            chromosomes.append(chromosome)
+        return chromosomes
+    
+    
+    def decode_chromosomes(self, chromosomes):
+        params = {}
+        assert len(chromosomes) == 2*(len(self.nn_layers_dimension) - 1), (
+            "Not enough chromosomes to decode. Please make sure to add the exact number of chromosome to create the MLP.")
+        for chromosome in chromosomes:
+            params[chromosome.id] = chromosome.genes
+            
+        for (key, param) in params.items():
+            if key[0] == 'W':
+                idx = int(key[-1])
+                shape = (self.nn_layers_dimension[idx-1], self.nn_layers_dimension[idx])
+                params[key] = param.reshape(shape)
+            elif key[0] == 'b':
+                shape = (param.size, 1)
+                params[key] = param.reshape(shape)
+        
+        return params
+    
+    
+    def calculate_fitness(self):
+        self.fitness = (self.lifespan) + ((2**self.score) + (self.score**2.1)*500) - ((.25 * self.lifespan)**1.3 * (self.score**1.2))
+        self.fitness = max(self.fitness, .1)
+        # if self.score < 2 and self.lifespan > 300:
+        #     self.fitness = 0
+    
+    
+    # -------------------------------------------------------------------------
+    # Unique Methods
+        
+    
     def _get_bearing(self):
         bearing = self.direction.value
         return bearing
     
     
     def update_full_vision(self):
-        
         # Update the bearing
         bearing = self._get_bearing()
         self.bearing = bearing
@@ -105,23 +159,21 @@ class Snake:
         delta_i = tail1.coord[0] - tail2.coord[0]
         delta_j = tail1.coord[1] - tail2.coord[1]
         if delta_i < 0:
-            return Direction.RIGHT
-        elif delta_i >= 0:
-            return Direction.LEFT
-        elif delta_j < 0:
             return Direction.DOWN
-        else:
+        elif delta_i >= 0:
             return Direction.UP
+        elif delta_j < 0:
+            return Direction.LEFT
+        else:
+            return Direction.RIGHT
     
     
     def kill(self):
-        
         for cell in self.body:
             self.game.grid.set_empty(cell.coord)
-            
+                 
 
     def _next_move(self):
-        
         head = self.body[-1] # Last element
         head_coord = head.coord
         
@@ -141,10 +193,8 @@ class Snake:
         return new_head
        
     
-    def _compute_input(self):
-        
+    def compute_input(self):
         vision_type = self.vision_type
-        
         # Set the input array for the neural network
         X = np.array([])
         # Binary vision
@@ -163,15 +213,26 @@ class Snake:
         one_hot = one_hot_direction(self.direction)
         X = np.concatenate((X, one_hot))
                 
-        return X
-          
+        return X[:, np.newaxis]
+    
+    
+    def compute_output(self, X):
+        Y_hat = self.nn.forward(X)
+        return Y_hat
+    
+    
+    def next_direction(self):
+        X = self.compute_input()
+        Y = self.compute_output(X)
+        # Get the new direction by  the predicted class * 90 (to get the degrees)
+        next_direction = Direction(np.argmax(Y) * 90)
+        return next_direction
+    
     
     def update_state(self):
         self.update_full_vision()
-        self._compute_input()
         
-    
-        
+            
     def move(self):
         """
         Move the snake and update the game.
@@ -197,7 +258,7 @@ class Snake:
             # The snake died
             return False
         
-        # Test if it grow
+        # Test if it grows
         elif grid.is_apple(new_head):
             # Update the body
             self.body.append(new_head)
@@ -227,7 +288,10 @@ class Snake:
             
         # Update its lifespan
         self.lifespan += 1 
-                        
+        if self.lifespan > 1000:
+            return False
+        if self.lifespan > 100 and self.score <= 2:
+            return False
         return True
         
     

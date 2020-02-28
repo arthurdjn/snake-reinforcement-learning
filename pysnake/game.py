@@ -13,18 +13,18 @@ from pysnake.snake import Snake
 
 class Game:
     
-    def __init__(self, shape, seed=True):
+    def __init__(self, shape, seed=None):
         
         # Fix random numbers, use for debug mode
         self.seed = seed
-        if seed:
-            rd.seed(1968)
+        if not seed is None:
+            rd.seed(seed)
         
         self.shape = shape
         self.grid = Grid(shape)
         # Add borders to the grid
         self.grid.add_wall_borders()
-        self.snakes = [Snake(self)]
+        self.snakes = []
         self.apples = []
         self.add_apple()
         
@@ -73,14 +73,25 @@ class Game:
         # Update the grid
         self.grid.set_cell(apple)
         
+    
+    def clean(self):
+        # Kill the snakes
+        for snake in self.snakes:
+            snake.kill()
+        self.snakes = []     
+        # Delete all apples
+        for apple in self.apples:
+            self.grid.set_empty(apple.coord)
+        self.apples = []
+        
 
-    def restart(self):
+    def restart(self, snake=None):
         # Kill the snakes
         for snake in self.snakes:
             snake.kill()
         self.snakes = []
         # Add a new snake
-        self.add_snake()
+        self.add_snake(snake)
         
         # Delete all apples
         for apple in self.apples:
@@ -94,9 +105,22 @@ class Game:
             snake.update_full_vision()
 
 
-
-
-
+    def run(self):
+        if self.snakes == []:
+            snake = Snake(self)
+            self.add_snake(snake)
+        else:
+            # Take the last snake saved
+            snake = self.snakes[-1]
+        # print('before', snake.fitness)
+        is_alive = True
+        while is_alive:
+            next_direction = snake.next_direction()
+            snake.direction = next_direction
+            is_alive = snake.move()
+        
+        snake.calculate_fitness()
+        # print('after', snake.fitness)
 
 
 

@@ -36,6 +36,7 @@ class WindowGame:
         for col in range(width):
             pygame.draw.line(self.pygame_win, color, (col*self.cell_size, 0), (col*self.cell_size, height*self.cell_size))
 
+
     def _draw_vision(self, show_grid=True):
         for snake in self.game.snakes:
             for num_vision, vision in enumerate(snake.full_vision):
@@ -123,21 +124,13 @@ class WindowGame:
                                      (j*self.cell_size, i*self.cell_size, 
                                       self.cell_size, self.cell_size)) 
             
-            
-            
         
     def draw(self, show_grid=True, show_vision=False):
-
         self._draw_game()
-        
         if show_grid:
             self._draw_grid()
-
-        
         if show_vision:
-            self._draw_vision(show_grid)
-
-                
+            self._draw_vision(show_grid)         
         pygame.display.update()
 
 

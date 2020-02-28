@@ -18,24 +18,38 @@ class Individual(ABC):
     """
     
     
-    def __init__(self, id):
+    def __init__(self, chromosomes=None, id=None):
         
-        self.__fitness = None
-        self.__chromosome = None
-        self.__id = id
+        self.chromosomes = self._init_chromosomes(chromosomes)
+        self.id = id
+        self.calculate_fitness()
         
         
+    # -------------------------------------------------------------------------
+    # Methods
+        
+    def _init_chromosomes(self, chromosomes):
+        if chromosomes is not None :
+            return chromosomes
+        else:
+            return self.encode_chromosomes()
+        
+    def mutate_gaussian(self, prob_mutation, mu=0, sigma=1):
+        for chromosome in self.chromosomes:
+            chromosome.mutate_gaussian(prob_mutation, mu=mu, sigma=sigma)
+            
+    def mutate(self, prob_mutation):
+        for chromosome in self.chromosomes:
+            chromosome.mutate(prob_mutation)
+        
+
     # -------------------------------------------------------------------------
     # Abstract methods
     
     @abstractmethod
-    def encode_chromosome(self):
+    def encode_chromosomes(self):
         raise Exception('encode_chromosome function must be defined')
-        
-    @abstractmethod
-    def decode_chromosome(self):
-        raise Exception('decode_chromosome function must be defined')
-    
+            
     @abstractmethod
     def calculate_fitness(self):
         raise Exception('calculate_fitness function must be defined')
@@ -43,29 +57,32 @@ class Individual(ABC):
     
     # -------------------------------------------------------------------------
     # Getters and setters
-
-    @property
-    def fitness(self):
-        return self.__fitness
-
-    @fitness.setter
-    def fitness(self, value):
-        raise AttributeError("attribute 'fitness' of 'Individuals' objects is not writable. Use method 'calculate_fitness' instead.")
-
-    @property
-    def chromosome(self):
-        return self.__chromosome
-
-    @chromosome.setter
-    def chromosome(self, value):
-        raise AttributeError("attribute 'chromosome' of 'Individuals' objects is not writable.")
         
     @property
-    def id(self):
-        return self.__id
+    def size(self):
+        return len(self.chromosomes)
     
-    @id.setter
-    def id(self, value):
-        raise AttributeError("attribute 'id' of 'Individuals' objects is not writable.")
+    @size.setter
+    def size(self, value):
+        raise AttributeError("attribute 'size' is not writtable.")
+            
+    
+    # -------------------------------------------------------------------------
+    # Access
+    
+    def __getitem__(self, index):
+        return self.chromosomes[index]
+    
+    def __str__(self):
+        string  = "Individual: {0}\n".format(self.id if self.id is not None else "")
+        string += "fitness   : {0}\n".format(self.fitness)
+        # string += "chromosomes: {0}\n".format(len(self.chromosomes))
+        string += str(self.chromosomes[0]) + "\n"
+        if len(self.chromosomes) > 2:
+            string += "      ...\n"
+        string += str(self.chromosomes[-1])
         
-        
+        return string
+    
+    
+    

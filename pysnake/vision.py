@@ -140,18 +140,18 @@ class Vision:
                 # overshot in the y direction
                 err = err - delta_j
                 start_i = start_i + sign_i               
-                cell = self.grid[start_i, start_j]
-                visible_cells.append(cell)
+                # cell = self.grid[start_i, start_j]
+                # visible_cells.append(cell)
                 
             if e2 <= delta_i:
                 # overshot in the x direction
                 err = err + delta_i
                 start_j = start_j + sign_j
-                cell = self.grid[start_i, start_j]
-                visible_cells.append(cell)
+                # cell = self.grid[start_i, start_j]
+                # visible_cells.append(cell)
                 
-            # cell = self.grid[start_i, start_j]
-            # visible_cells.append(cell)
+            cell = self.grid[start_i, start_j]
+            visible_cells.append(cell)
 
         return visible_cells
             
@@ -201,7 +201,7 @@ class Vision:
                              self.center.coord[1] - self.visible_object.coord[1])
             distances[self.visible_object.value] = np.linalg.norm(vector_object)
         
-        # Normalize by the width / height
+        # Normalize by the width / height ratio
         distances /= np.linalg.norm((self.grid.shape[0] - 2, self.grid.shape[1] - 2))
         
         return distances
