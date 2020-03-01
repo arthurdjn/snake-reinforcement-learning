@@ -31,7 +31,7 @@ class Vision:
         self.visible_object = self.detect()
         
         # Distances vector : distance from the walls, to apple, to itself
-        self.distances = self._init_distances()     
+        # self.distances = self.to_distances()     
         
     
     def _get_end_point(self):
@@ -182,7 +182,7 @@ class Vision:
         return one_hot_vector(y, num_class)
         
     
-    def _init_distances(self):
+    def to_distances(self):
         # Ditance to walls | Distance to Apple | Distance to itself | etc.
         # Ignore empty cell
         num_class = len(Item) - 1
@@ -201,8 +201,7 @@ class Vision:
                              self.center.coord[1] - self.visible_object.coord[1])
             distances[self.visible_object.value] = np.linalg.norm(vector_object)
         
-        # Normalize by the width / height ratio
-        distances /= np.linalg.norm((self.grid.shape[0] - 2, self.grid.shape[1] - 2))
+        # distances /= np.linalg.norm((self.grid.shape[0] - 2, self.grid.shape[1] - 2))
         
         return distances
         

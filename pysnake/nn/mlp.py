@@ -75,10 +75,9 @@ class MLP(object):
         # Get the layers dimension
         layer_dimensions = self.layer_dimensions
         depth = len(layer_dimensions) - 1
-        # Get the activation function
-        activation_function = self.activation_function
         # 1/ Iterates through the depth of the neural network
-        Z = X_batch       
+        Z = X_batch   
+        self.params['A_0'] = Z
         for i in range(1, depth + 1):
             # 1.1/ Get the weights and biases from the params       
             layer_W = "W_" + str(i)
@@ -94,9 +93,11 @@ class MLP(object):
             # not from the last hidden layer to the outputs
             if i < depth:
                 Z = self.activation_function(Z)
+                self.params['A_' + str(i)] = Z
             
         # 3/ Softmax
         Y_proposed = softmax(Z)
+        self.params['A_' + str(i)] = Y_proposed
     
         return Y_proposed
     

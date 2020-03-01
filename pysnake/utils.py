@@ -10,7 +10,6 @@ Usefull functions for debugging and displaying better grid.
 import numpy as np
 
 
-
 # Extract coordinates from cells
 def cell_to_coord(*cells):
     return [cell.coord for cell in cells]
