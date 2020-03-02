@@ -24,8 +24,7 @@ The snake dies when it eats itself or crash in a wall.
 
 ### SAGA
 
-The model has been trained on [SAGA servers](https://documentation.sigma2.no/quick/saga.html), in 3000 generations of 1500 snakes each.
-With 8GB ram and 4 nodes, the training session lasted 4 days.
+The model has been trained on [SAGA](https://documentation.sigma2.no/quick/saga.html) servers, through 3000 generations of 1500 snakes each. With 8GB ram and 4 nodes, the training session lasted 4 days.
 
 ## Getting Started
 
@@ -43,7 +42,14 @@ Or simply clone this repository:
 $ git clone https://github.com/arthurdjn/pysnake
 ```
 
-Note that pysnake requires pygame to visualize the game.
+Note that pysnake requires [pygame](https://www.pygame.org/news) to visualize the game.
+I you installed **pysnake** through pip, it will automatically download all required dependencies. Otherwise, use:
+
+```
+$ pip install pygame
+$ pip install numpy
+$ pip install json
+```
 
 ### Config
 
@@ -58,7 +64,7 @@ $ python pysnake
 ```
 You can explicitly use:
 ```
-$ python pysnake --play True
+$ python pysnake --mode play
 ```
 
 If you created a custom config.ini:
@@ -68,6 +74,10 @@ $ python pysnake --config path/to/your/config.ini
 
 
 ### Train
+
+```
+$ python pysnake --mode train
+```
 
 #### Save
 
