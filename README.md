@@ -31,6 +31,11 @@ With 8GB ram and 4 nodes, the training session lasted 4 days.
 
 ### Install
 
+To install, run the command on the root folder
+
+``pycon
+pip install .
+``
 
 
 ### Config
