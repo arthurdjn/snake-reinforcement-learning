@@ -14,31 +14,29 @@ def readme_data():
 
 find_packages()
 
-setup(name='pynews',
+setup(name='pysnake',
         version = '0.1',
-        description = 'Feed Forward Neural Network for document classifier.',
+        description = 'AI learns to play snake game.',
         long_description = readme_data(),
         long_description_content_type = "text/markdown",
-        url = 'https://github.uio.no/arthurd/pynews',
-        author = 'Lotte Boerboom, Sigurd Hylin, Arthur Dujardin',
+        url = 'https://github.uio.no/arthurd/pysnake',
+        author = 'Arthur Dujardin',
         author_email = 'arthur.dujardin@ensg.eu',
         license = 'Apache License-2.0',
 
-        install_requires = ['torch', 'numpy', 'pandas', 'pickle', 
-                        'sklearn', 'time'],
+        install_requires = ['pygame', 'numpy', 'json'],
         packages = find_packages(),
-        namespace_packages = ['pynews'],
-        zip_safe  =False,
+        zip_safe  = False,
         classifiers = [
         # How mature is this project? Common values are
         #   3 - Alpha
         #   4 - Beta
         #   5 - Production/Stable
-        'Development Status :: 5 - Stable',
+        'Development Status :: 4 - Beta',
     
         # Indicate who your project is intended for
         'Intended Audience :: Developers',
-        'Topic :: Software Development :: Natural Language Processing and Classification',
+        'Topic :: Software Development :: Deep Learning and Genetic Algorithm',
     
         # Pick your license as you wish (should match "license" above)
     

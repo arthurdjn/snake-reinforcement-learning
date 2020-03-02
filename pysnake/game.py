@@ -165,8 +165,8 @@ class GameApplication:
         # Saving
         self.save_best_individuals = eval(config.get('GeneticAlgorithm', 'save_best_individuals'))
         self.save_generations = eval(config.get('GeneticAlgorithm', 'save_generations'))
-        self.saving_steps = eval(config.get('GeneticAlgorithm', 'saving_steps'))
-        self.saves_dir = eval(config.get('GeneticAlgorithm', 'saves_dir'))
+        self.save_steps = eval(config.get('GeneticAlgorithm', 'save_steps'))
+        self.save_dir = eval(config.get('GeneticAlgorithm', 'save_dir'))
         # Training
         self.num_generations = eval(config.get('GeneticAlgorithm', 'num_generations'))
         self.num_parents = eval(config.get('GeneticAlgorithm', 'num_parents'))
@@ -290,13 +290,13 @@ class GameApplication:
                             self.game.clean()
             
             # Save ?
-            if self.save_best_individuals and generation % self.saving_steps == 0:
-                dirpath = self.saves_dir + os.sep + "fittest"
+            if self.save_best_individuals and generation % self.save_steps == 0:
+                dirpath = self.save_dir + os.sep + "fittest"
                 filename = "snake_" + str(generation) + ".json"
                 save_snake(population.fittest, filename, dirpath = dirpath)
                 
-            if self.save_generations and generation % self.saving_steps == 0:
-                dirpath = self.saves_dir + os.sep + "generation_" + str(generation)
+            if self.save_generations and generation % self.save_steps == 0:
+                dirpath = self.save_dir + os.sep + "generation_" + str(generation)
                 for (i, snake) in enumerate(population.individuals):
                     snake.id = i
                     filename ='snake_' + str(i) + '.json'
