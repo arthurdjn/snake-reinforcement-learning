@@ -8,6 +8,7 @@ Usefull functions for debugging and displaying better grid.
 
 
 import numpy as np
+import json
 
 
 # Extract coordinates from cells
@@ -31,3 +32,23 @@ def one_hot_direction(direction):
     y_tilde = np.zeros(4)
     y_tilde[direction.value // 90] = 1
     return y_tilde
+
+
+
+
+def load_params(filename):
+    # Open the file
+    with open(filename) as f:
+        data = json.load(f)
+    
+    params = {'length': data['length'],
+              'id': data['id'],
+              'vision_mode': data['vision_mode'],
+              'vision_type': data['vision_type'],
+              'nn_params': {}
+              }
+    
+    for (key, param) in data['params'].items():
+        params['nn_params'][key] = np.array(param)
+    
+    return params

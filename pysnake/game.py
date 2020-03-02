@@ -221,11 +221,13 @@ class GameApplication:
             self.fps_train -= 1
                        
 
-    def play(self, snake=None):
-               
+    def play(self, params=None):      
         # Make sure you can play the game
-        if snake is None:
-            snake = Snake(self.game, **self.snake_params)       
+        run_ai = True
+        if params is None:
+            params = self.snake_params
+            run_ai = False
+        snake = Snake(self.game, **params) 
         self.game.start(snake)
             
         # Run the game until the end
@@ -241,10 +243,13 @@ class GameApplication:
                                     
             # Always move the snake if not paused
             if not self._pause:
+                if run_ai:
+                    next_direction = snake.next_direction()
+                    snake.direction = next_direction
                 is_alive = snake.move()
                 
                 if not is_alive:
-                    snake = Snake(self.game, **self.snake_params)
+                    snake = Snake(self.game, **params)
                     self.game.start(snake)
                     self._pause = True
                     

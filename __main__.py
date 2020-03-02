@@ -7,7 +7,8 @@ import configparser
 from argparse import ArgumentParser
 
 from pysnake.game import GameApplication
-from pysnake.snake import load_snake
+from pysnake.snake import Snake
+from pysnake.utils import load_params
 
     
 
@@ -21,7 +22,6 @@ if __name__ == "__main__":
                         type=str, default='play')
     parser.add_argument('--loadsnake', help="Load a snake in json format and add it to a game",
                         type=str, default=None)
-    
     # Get the arguments    
     args = parser.parse_args()
     config_file = args.config
@@ -48,8 +48,8 @@ if __name__ == "__main__":
     snake_game = GameApplication(config)
     
     if type(loadsnake) is str:
-        snake = load_snake('../saves/snake.json')
-        snake_game.play(snake)
+        params = load_params(loadsnake)
+        snake_game.play(params)
     elif mode == 'play':
         snake_game.play()
     else:       
