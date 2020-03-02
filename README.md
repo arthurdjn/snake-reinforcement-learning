@@ -31,12 +31,19 @@ With 8GB ram and 4 nodes, the training session lasted 4 days.
 
 ### Install
 
-To install, run the command on the root folder
+To install, run the command in the root folder:
 
-``pycon
-pip install .
-``
+```pycon
+$ pip install .
+```
 
+Or simply clone this repository:
+
+```
+$ git clone https://github.com/arthurdjn/pysnake
+```
+
+Note that pysnake requires pygame to visualize the game.
 
 ### Config
 
@@ -44,6 +51,21 @@ The application settings are available from the config.ini file. You can create 
   
 
 ### Play
+
+To simply play the game and test all options available:
+```
+$ python pysnake
+```
+You can explicitly use:
+```
+$ python pysnake --play True
+```
+
+If you created a custom config.ini:
+```
+$ python pysnake --config path/to/your/config.ini
+```
+
 
 ### Train
 
