@@ -8,8 +8,7 @@
 ## Overview
 
 **PySnake** is an artificial intelligence that learns to control a snake. This AI learns to recognize its environment and choose the best direction to survive.
-This model uses Genetic Algorithm theory, as there is no training data provided. Genetic Algorithm provides an alternative as each agents (snakes) learned to evolve in a new environment.
-
+This model uses Genetic Algorithm theory, as there is no training data available.
 <p align="center">
   <b>PySnake Interface</b><br>
   <img src="img/pysnake_intro.png">
