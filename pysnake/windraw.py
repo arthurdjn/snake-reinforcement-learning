@@ -48,12 +48,12 @@ class WindowGame:
         self.cell_size = cell_size
         self.bbox_game = bbox_game
         self.bbox_network = bbox_network
-        self.color_palette = {"background": (5, 18, 35),
-                              "empty": (17, 47, 92),
-                              "snake": (178, 219, 237),
-                              "snake_head": (108, 199, 235),
-                              "apple": (63, 171, 31),
-                              "wall": (9, 30, 61),
+        self.color_palette = {"background": (19, 19, 48),
+                              "empty": (36, 44, 66),
+                              "wall": (34, 37, 61),
+                              "snake": (186, 192, 206),
+                              "snake_head": (186, 192, 206),
+                              "apple": (60, 188, 42),
                               "vision": (125, 125, 125),
                               "neuron": (255, 255, 255),
                               "weight_pos": (11, 73, 11),
@@ -69,13 +69,13 @@ class WindowGame:
                 # Draw the visible_object
                 i, j = vision.visible_object.coord
                 if  vision.visible_object.item is Item.APPLE:
-                    color = (21, 200, 22)
+                    color = (0, 255, 0)
                 elif vision.visible_object.item is Item.SNAKE:
-                    color = (73, 11, 12)
+                    color = (255, 0, 0)
                 else:
                     color = self.color_palette['empty']
                 pygame.draw.rect(self.pygame_win, color, 
-                                 ((j0 + j) * self.cell_size, (i0 + i) * self.cell_size, 
+                                 (j0 + j * self.cell_size, i0 + i * self.cell_size, 
                                   self.cell_size, self.cell_size)) 
                 
                 # Set the vision's color regarding the visible object
