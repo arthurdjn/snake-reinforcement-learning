@@ -11,7 +11,7 @@
 This model uses Genetic Algorithm theory, as there is no training data available.
 <p align="center">
   <b>PySnake Interface</b><br>
-  <img src="img/pysnake_intro.png">
+  <img src="img/pysnake_ai.gif">
   <br>
 </p>
 
