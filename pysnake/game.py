@@ -3,6 +3,7 @@
 # @author: arthurd
 
 
+import os
 import numpy as np
 import random as rd
 
@@ -161,6 +162,12 @@ class GameApplication:
                             
         # Genetic Algorithm
         # -----------------
+        # Saving
+        self.save_best_individuals = eval(config.get('GeneticAlgorithm', 'save_best_individuals'))
+        self.save_generations = eval(config.get('GeneticAlgorithm', 'save_generations'))
+        self.saving_steps = eval(config.get('GeneticAlgorithm', 'saving_steps'))
+        self.saves_dir = eval(config.get('GeneticAlgorithm', 'saves_dir'))
+        # Training
         self.num_generations = eval(config.get('GeneticAlgorithm', 'num_generations'))
         self.num_parents = eval(config.get('GeneticAlgorithm', 'num_parents'))
         self.num_offspring = eval(config.get('GeneticAlgorithm', 'num_offspring'))
@@ -170,7 +177,7 @@ class GameApplication:
         self.probability_SPBX = eval(config.get('GeneticAlgorithm', 'probability_SPBX'))
         self.crossover_selection_type = str(config.get('GeneticAlgorithm', 'crossover_selection_type'))
         self.mutation_rate = eval(config.get('GeneticAlgorithm', 'mutation_rate'))
-        self.mutation_rate_type = str(config.get('GeneticAlgorithm', 'mutation_rate_type'))
+        # self.mutation_rate_type = str(config.get('GeneticAlgorithm', 'mutation_rate_type'))
         self.gaussian_mu = eval(config.get('GeneticAlgorithm', 'gaussian_mu'))
         self.gaussian_std = eval(config.get('GeneticAlgorithm', 'gaussian_std'))
         
@@ -205,7 +212,14 @@ class GameApplication:
         # Show the grid
         elif keys[pygame.K_g]:
             self.show_grid = not self.show_grid
-        
+        # Increasing / Decreasing the fps
+        elif keys[pygame.K_KP_PLUS]:
+            self.fps_play += 1
+            self.fps_train += 1
+        elif keys[pygame.K_KP_MINUS]:
+            self.fps_play -= 1
+            self.fps_train -= 1
+                       
 
     def play(self, snake=None):
                
@@ -275,6 +289,20 @@ class GameApplication:
                             population.individuals[i] = snake  
                             self.game.clean()
             
+            # Save ?
+            if self.save_best_individuals and generation % self.saving_steps == 0:
+                dirpath = self.saves_dir + os.sep + "fittest"
+                filename = "snake_" + str(generation) + ".json"
+                save_snake(population.fittest, filename, dirpath = dirpath)
+                
+            if self.save_generations and generation % self.saving_steps == 0:
+                dirpath = self.saves_dir + os.sep + "generation_" + str(generation)
+                for (i, snake) in enumerate(population.individuals):
+                    snake.id = i
+                    filename ='snake_' + str(i) + '.json'
+                    save_snake(snake, filename, dirpath = dirpath)
+            
+            # Display a log each generations
             print("----------------------")
             print("Generation :{0:4d}/{1}".format(generation + 1, self.num_generations), end = " | ")
             print("best fitness : {0:2.3E}".format(population.fittest.fitness), end = " | ")
@@ -294,9 +322,12 @@ class GameApplication:
                     chromosomes_child1, chromosomes_child2 = population.crossover_simulated_binary(parent1, parent2, eta=100)
                 else:
                     chromosomes_child1, chromosomes_child2 = population.crossover_single_point(parent1, parent2)
-                    
+                
+                # Create the new individuals
                 snake_child1 = Snake(Game(self.board_size), chromosomes=chromosomes_child1, **self.snake_params)
                 snake_child2 = Snake(Game(self.board_size), chromosomes=chromosomes_child2, **self.snake_params)    
+               
+                # Mutate their genes
                 mutation_rate = self.mutation_rate
                 snake_child1.mutate(mutation_rate)
                 snake_child2.mutate(mutation_rate)

@@ -3,7 +3,7 @@
 # @author: arthurd
 
 
-
+import os
 import numpy as np
 import random as rd
 import json
@@ -338,7 +338,7 @@ class Snake(Individual):
         
     
     
-def save_snake(snake, filename):
+def save_snake(snake, filename, dirpath = '.'):
     data = {'id': snake.id,
             'game_shape': snake.game.shape,
             'score': snake.score,
@@ -361,7 +361,11 @@ def save_snake(snake, filename):
     # Save it !
     if filename.split('.')[-1] != 'json':
         filename += '.json'
-    with open(filename, 'w') as f:
+        
+    if not os.path.exists(dirpath):
+        os.makedirs(dirpath)
+        
+    with open(dirpath + os.sep + filename, 'w') as f:
         json.dump(data, f)   
 
     

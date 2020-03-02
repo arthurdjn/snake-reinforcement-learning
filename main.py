@@ -20,13 +20,14 @@ if __name__ == "__main__":
     
     # Play
     # ----
-    snake_game.play()
+    # snake_game.play()
     
+    # Load a snake
     # snake = load_snake('../saves/snake.json')
     # snake_game.play(snake)
     
     # Train
     # -----
-    # snake_game.train()
+    snake_game.train()
 
     
