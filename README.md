@@ -1,6 +1,7 @@
-# PySnake
-
 ![GitHub](https://img.shields.io/github/license/arthurdjn/pysnake)
+
+
+# PySnake
 
 **Deep Learning** and **Genetic Algorithm** applied to the snake game.
 
