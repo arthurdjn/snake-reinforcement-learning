@@ -46,7 +46,7 @@ $ pip install json
 
 ### Config
 
-The application settings are available from the config.ini file. You can create a custom one, as long as you have the necessary parameters.
+The application settings are available from the `config.ini` file. You can create a custom one, as long as you have the necessary parameters.
   
 
 ### Play
@@ -56,9 +56,13 @@ You can play and launch the application by running the following command:
 $ python pysnake
 ```
 This will call the `pysnake/__main__.py` file and execute your command.
-
 If you choose to render the game, you should see a pop-up window like this:
+
+
 ![intro](img/pysnake_intro.png)
+
+You can turn it off with `render = False` in the `config.ini` file.
+
 
 There are more key arguments that you can used to launch the application:
 - `--mode`: run either a playble or trainable game,
@@ -82,24 +86,18 @@ If you created a custom config.ini, specify it each time you run pysnake:
 $ python pysnake --config path/to/your/config.ini
 ```
 
-
-#### Save
-
 Snakes and generations can be saved. Change the default parameters in the `config.ini` files.
 Even though saving the best snakes for X generations depends on your needs, I recommend that you save some of your generations, in case your computer / server shuts down. Saving generations with a `saving_steps = 50` prevents you to starting the simulation from zero if something (bad) happens.
 
-#### Load
-
+Once snakes are saved, load them with one of these commands:
 
 ```
 $ python pysnake --snake pysnake/snake.json
 ```
 
-
 ```
 $ python pysnake --replay pysnake/snake.json
 ```
-
 
 ```
 $ python pysnake --mode train --population pysnake/saves/generation_1500
