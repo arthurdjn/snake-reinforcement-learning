@@ -29,20 +29,14 @@ The model has been trained on [SAGA](https://documentation.sigma2.no/quick/saga.
 
 ### Install
 
-To install, run the command in the root folder:
-
-```pycon
-$ pip install .
-```
-
-Or simply clone this repository:
+To install, clone this repository:
 
 ```
 $ git clone https://github.com/arthurdjn/pysnake
 ```
 
 Note that pysnake requires [pygame](https://www.pygame.org/news) to visualize the game.
-I you installed **pysnake** through pip, it will automatically download all required dependencies. Otherwise, use:
+I you installed **pysnake** through pip `pip install .`, it will automatically download all required dependencies. Otherwise, use:
 
 ```
 $ pip install pygame
@@ -57,28 +51,42 @@ The application settings are available from the config.ini file. You can create 
 
 ### Play
 
-To simply play the game and test all options available:
+You can play and launch the application by running the following command:
 ```
 $ python pysnake
 ```
-You can explicitly use:
+This will call the `pysnake/__main__.py` file and execute your command.
+
+If you choose to render the game, you should see a pop-up window like this:
+![intro](img/pysnake_intro.png)
+
+There are more key arguments that you can used to launch the application:
+- `--mode`: run either a playble or trainable game,
+- `--config`: read a custom config file,
+- `--snake`: run a snake from a saved file. The snake will play automatically in an unseen environment,
+- `--replay`: run a snake from a saved file, in the same environment from which it was originally saved,
+- `--population`: train snakes from an existing population.
+
+
+#### Examples
+
+By default, the game mode used is `play`.
+If you just want to play the game, you can explicitly use in addition the `--mode` key argument:
 ```
 $ python pysnake --mode play
 ```
+You can specify `--mode train` to train snakes.
 
-If you created a custom config.ini:
+If you created a custom config.ini, specify it each time you run pysnake:
 ```
 $ python pysnake --config path/to/your/config.ini
 ```
 
 
-### Train
-
-```
-$ python pysnake --mode train
-```
-
 #### Save
+
+Snakes and generations can be saved. Change the default parameters in the `config.ini` files.
+Even though saving the best snakes for X generations depends on your needs, I recommend that you save some of your generations, in case your computer / server shuts down. Saving generations with a `saving_steps = 50` prevents you to starting the simulation from zero if something (bad) happens.
 
 #### Load
 
