@@ -23,7 +23,7 @@ The snake dies when it eats itself or crash in a wall.
 
 ### SAGA
 
-The model has been trained on [SAGA](https://documentation.sigma2.no/quick/saga.html) servers, through 3000 generations of 1500 snakes each. With 8GB ram and 4 nodes, the training session lasted 4 days.
+The model has been trained on [SAGA](https://documentation.sigma2.no/quick/saga.html) servers, through 3000 generations of 1500 snakes each.
 
 ## Getting Started
 
@@ -81,6 +81,21 @@ $ python pysnake --mode train
 #### Save
 
 #### Load
+
+
+```
+$ python pysnake --snake pysnake/snake.json
+```
+
+
+```
+$ python pysnake --replay pysnake/snake.json
+```
+
+
+```
+$ python pysnake --mode train --population pysnake/saves/generation_1500
+```
 
 ## Development
 
