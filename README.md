@@ -23,7 +23,7 @@ The snake dies when it eats itself or crash in a wall.
 
 ### SAGA
 
-The model has been trained on [SAGA](https://documentation.sigma2.no/quick/saga.html) servers, through 3000 generations of 1500 snakes each.
+[SAGA](https://documentation.sigma2.no/quick/saga.html) is a distributed memory system which consists of 244 dual/quad socket nodes, interconnected with a high-bandwidth low-latency InfiniBand network. The model has been trained on [SAGA](https://documentation.sigma2.no/quick/saga.html) servers with an access of 16GB ram and 8 nodes, through 3000 generations of 1500 snakes each.
 
 ## Getting Started
 
@@ -60,6 +60,17 @@ If you choose to render the game, you should see a pop-up window like this:
 
 
 ![intro](img/pysnake_intro.png)
+
+To play the game, use :
+- `UP ARROW` to move up,
+- `LEFT ARROW` to move left,
+- `DOWN ARROW` to move down,
+- `RIGHT ARROW` to move right,
+- `SPACE BAR` to pause the game,
+- `r` to restart the game,
+- `v` to render the snake's vision,
+- `g` to display the game grid
+
 
 You can turn it off with `render = False` in the `config.ini` file.
 
@@ -105,14 +116,17 @@ $ python pysnake --mode train --population pysnake/saves/generation_1500
 
 ## Development
 
+PySnake architecture depends on 3 elements:
+- `snake's vision`,
+- `neural network`,
+- `genetic algorithm`.
+
 ### Vision
+
+The snake's vision is composed of rays (lines) going from its head to the game borders. These rays are equally spaced, the range depends on the `vision_mode` parameters (goes from 1 to +infinity). The vision can be visualized as a LiDAR sensor.
 
 <p align="center">
   <b>8-mode vision</b><br>
   <img src="img/pysnake_vision.gif">
   <br>
 </p>
-
-### Neural Network
-
-### Genetic Algorithm
