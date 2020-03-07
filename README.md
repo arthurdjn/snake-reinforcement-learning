@@ -88,7 +88,7 @@ $ python pysnake --mode train
 
 <p align="center">
   <b>8-mode vision</b><br>
-  <img src="img/pysnake_vision.png">
+  <img src="img/pysnake_vision.gif">
   <br>
 </p>
 
