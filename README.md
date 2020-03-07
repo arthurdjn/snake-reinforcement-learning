@@ -79,7 +79,7 @@ There are more key arguments that you can used to launch the application:
 - `--mode`: run either a playble or trainable game,
 - `--config`: read a custom config file,
 - `--snake`: run a snake from a saved file. The snake will play automatically in an unseen environment,
-- `--replay`: run a snake from a saved file, in the same environment from which it was originally saved,
+- `--replay`: run a snake from a saved file, in the same environment it was originally saved,
 - `--population`: train snakes from an existing population.
 
 
