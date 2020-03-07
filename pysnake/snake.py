@@ -33,15 +33,20 @@ class Snake(Individual):
                  chromosomes = None,
                  nn_hidden_layers = [20, 12],
                  nn_params = None, 
-                 max_lifespan = None, **kwargs):
+                 lifespan_max = None,
+                 hunger_max = 300, **kwargs):
         
-        # The snake can't live without a game !
+        # Init the snake in a game
         self.game = game
+        # Fix the seed, for replay / debug
+        self.seed = game.seed
+        np.random.seed(self.seed)
+        rd.seed(self.seed)
         
         self.length = length
         self.vision_mode = vision_mode
         self.vision_type = vision_type
-        self.body = self._create_snake()
+        self.body = self._init_body()
         
         # Bearing is optional.
         # If Bearing is set to self._get_bearing(), it will orientate the vision
@@ -55,7 +60,9 @@ class Snake(Individual):
         # Stats
         self.score = 0
         self.lifespan = 0
-        self.max_lifespan = np.inf if max_lifespan is None else max_lifespan
+        self.lifespan_max = np.inf if lifespan_max is None else lifespan_max
+        self.hunger = 0
+        self.hunger_max = np.inf if hunger_max is None else hunger_max
   
         # Vision
         head = self.body[-1]
@@ -67,7 +74,8 @@ class Snake(Individual):
         self.nn_hidden_layers = nn_hidden_layers
         self.nn_layers_dimension = [self.vision_mode*3 + 4*2] + list(self.nn_hidden_layers) + [4]
         params = self.decode_chromosomes(chromosomes) if chromosomes is not None else nn_params
-        self.nn = MLP(self.nn_layers_dimension, params=params)
+        self.nn = NeuralNetwork(self.nn_layers_dimension, params=params)
+        # Initialize the first activation (the value is used to display the neurons)
         self.next_direction()
         self.nn_params = self.nn.params
         
@@ -82,8 +90,9 @@ class Snake(Individual):
     def encode_chromosomes(self):
         chromosomes = []
         for (key, param) in self.nn.params.items():
-            chromosome = Chromosome(param.reshape(param.size), id=key, enable_crossover=True)
-            chromosomes.append(chromosome)
+            if key[0] == 'W' or key[0] == 'b':
+                chromosome = Chromosome(param.reshape(param.size), id=key, enable_crossover=True)
+                chromosomes.append(chromosome)
         return chromosomes
     
     
@@ -131,21 +140,18 @@ class Snake(Individual):
         self.full_vision.update(head, self.bearing)
                 
     
-    def _create_snake(self):
+    def _init_body(self):
                 
         body = []
         shape = self.game.shape
-       
         # Tail position
         tail_i = rd.randint(1 + self.length, shape[0] - 2 - self.length)
         tail_j = rd.randint(1 + self.length, shape[1] - 2 - self.length)
-
         coord = (tail_i, tail_j)
         body_set = {coord}
         snake_cell = Cell(coord, Item.SNAKE)
         body.append(snake_cell)
         self.game.grid.set_cell(snake_cell)
-        
         # Body of the snake
         # Last element is its head
         for _ in range(self.length - 1):
@@ -157,8 +163,22 @@ class Snake(Individual):
             body.append(snake_cell)
             body_set = body_set.union({coord})
             self.game.grid.set_cell(snake_cell)     
-        
         return body
+    
+    
+    # # @DEPRECTAED
+    # # Init in the middle
+    # def _init_body(self):
+    #     body = []
+    #     mid_i = self.game.shape[0] // 2 + self.length - 1
+    #     mid_j = self.game.shape[1] // 2
+    #     for l in range(self.length):
+    #         coord = (mid_i - l, mid_j)
+    #         snake_cell = Cell(coord, Item.SNAKE)
+    #         body.append(snake_cell)
+    #         self.game.grid.set_cell(snake_cell)     
+    #     return body
+    
     
     
     def _init_direction(self):
@@ -201,6 +221,20 @@ class Snake(Individual):
             return Direction.RIGHT
         else:
             return Direction.LEFT
+        
+        
+    def get_params(self):
+        params = {"length": self.length,
+                  "vision_mode": self.vision_mode,
+                  "vision_type":self.vision_type,
+                  "lifespan_max": self.lifespan_max,
+                  "hunger_max": self.hunger_max,
+                  "nn_hidden_layers": self.nn_hidden_layers,
+                  "nn_params": self.nn_params
+                  }
+    
+        return params
+    
     
     
     def kill(self):
@@ -235,7 +269,7 @@ class Snake(Individual):
         # Binary vision
         if vision_type == "binary":
             for vision in self.full_vision:
-                X = np.concatenate((X, vision.to_one_hot()))
+                X = np.concatenate((X, vision.to_binary()))
         # Distance mode
         else:
             for vision in self.full_vision:
@@ -313,6 +347,8 @@ class Snake(Individual):
             
             # Update the stats
             self.score += 1
+            # The snake ate, hunger decrease
+            self.hunger = 0
               
         # Move the snake
         else:
@@ -327,76 +363,20 @@ class Snake(Individual):
             # Update the vision & state
             self.update()
             
-        # Update its lifespan
+        # Update its lifespan and hunger
         self.lifespan += 1 
-        if self.lifespan > self.max_lifespan:
+        self.hunger += 1
+        
+        if self.lifespan > self.lifespan_max:
             return False
-        if self.lifespan > 100 and self.score < 1:
+        elif self.lifespan > 100 and self.score < 1:
+            return False
+        elif self.hunger > self.hunger_max:
             return False
         
         return True
         
     
-    
-def save_snake(snake, filename, dirpath = '.'):
-    data = {'id': snake.id,
-            'game_shape': snake.game.shape,
-            'score': snake.score,
-            'lifespan': snake.lifespan,
-            'length': snake.length,
-            'vision_mode': snake.vision_mode,
-            'vision_type': snake.vision_type,
-            'nn_hidden_layers': snake.nn_hidden_layers,
-            'body': [],
-            'params': {}}
-    
-    for (key, param) in snake.nn.params.items():
-        data['params'][key] =  param.tolist()
-    
-    for cell in snake.body:
-        data['body'].append({'coord': cell.coord,
-                             'item': cell.item.name,
-                             'value': cell.value})
-            
-    # Save it !
-    if filename.split('.')[-1] != 'json':
-        filename += '.json'
-        
-    if not os.path.exists(dirpath):
-        os.makedirs(dirpath)
-        
-    with open(dirpath + os.sep + filename, 'w') as f:
-        json.dump(data, f)   
-
-    
-    
-def load_snake(filename, game=None):
-    # Open the file
-    with open(filename) as f:
-        data = json.load(f)
-    
-    if game is None:
-        shape = data['game_shape']
-        game = gm.Game(shape)
-    
-    params = {}
-    for (key, param) in data['params'].items():
-        params[key] = np.array(param)
-        
-    snake = Snake(game, 
-                  nn_params=params, 
-                  vision_type=data['vision_type'],
-                  vision_mode=data['vision_mode'], 
-                  length=data['length'], 
-                  id=data['id'])
-    previous_body = snake.body
-    for cell in previous_body:
-        snake.game.grid.set_empty(cell.coord)
-    snake.body = [Cell(cell['coord'], Item.SNAKE) for cell in data['body']]
-    snake.game.grid.set_cell(*snake.body)
-
-    return snake
-
     
     
     

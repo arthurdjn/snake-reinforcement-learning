@@ -44,20 +44,24 @@ class WindowGame:
         
         self.pygame_win = pygame_win
         self.game = game
-        self.shape = game.shape
         self.cell_size = cell_size
         self.bbox_game = bbox_game
         self.bbox_network = bbox_network
-        self.color_palette = {"background": (19, 19, 48),
-                              "empty": (36, 44, 66),
-                              "wall": (34, 37, 61),
-                              "snake": (186, 192, 206),
-                              "snake_head": (186, 192, 206),
-                              "apple": (60, 188, 42),
-                              "vision": (125, 125, 125),
-                              "neuron": (255, 255, 255),
-                              "weight_pos": (11, 73, 11),
-                              "weight_neg": (73, 11, 11)}
+        self.color_palette = {"background":     (255, 255, 255),
+                              "empty":          (37, 54, 69),
+                              "wall":           (32, 44, 55),
+                              "snake":          (46, 142, 212),
+                              "snake_head":     (46, 142, 212),
+                              "apple":          (227, 68, 52),
+                              "neuron":         (255, 255, 255),
+                              "weight_pos":     (37, 117, 50),
+                              "weight_neg":     (227, 68, 52),
+                              "visible_snake":  (44, 112, 155),
+                              "visible_apple":  (237, 37, 27),
+                              "visible_wall":   (19, 28, 35),
+                              "vision":         (102, 119, 132),
+                              "vision_apple":   (237, 37, 27),
+                              "vision_snake":   (255, 0, 0)}
         
 
     def _draw_vision(self):
@@ -69,9 +73,9 @@ class WindowGame:
                 # Draw the visible_object
                 i, j = vision.visible_object.coord
                 if  vision.visible_object.item is Item.APPLE:
-                    color = (0, 255, 0)
+                    color = self.color_palette['visible_apple']
                 elif vision.visible_object.item is Item.SNAKE:
-                    color = (255, 0, 0)
+                    color = self.color_palette['visible_snake']
                 else:
                     color = self.color_palette['empty']
                 pygame.draw.rect(self.pygame_win, color, 
@@ -80,12 +84,10 @@ class WindowGame:
                 
                 # Set the vision's color regarding the visible object
                 color = self.color_palette['vision']
-                if num_vision == 0:
-                    color = (255, 255, 255)
                 if vision.visible_object.item is Item.APPLE:
-                    color = (0, 255, 0)
+                    color = self.color_palette['vision_apple']
                 elif vision.visible_object.item is Item.SNAKE:
-                    color = (255, 0, 0)
+                    color = self.color_palette['vision_snake']
                 
                 # Draw a line from the center to the last object (usually wall)
                 center = vision.center.coord

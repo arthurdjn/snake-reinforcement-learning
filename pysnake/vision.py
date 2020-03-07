@@ -28,7 +28,8 @@ class Vision:
         
         
         # Visibe item from its vision
-        self.visible_object = self.detect()
+        self.visible_object = self.detect()[0]
+        self.nearest_cells = self.detect()
         
         # Distances vector : distance from the walls, to apple, to itself
         # self.distances = self.to_distances()     
@@ -50,7 +51,6 @@ class Vision:
         height, width = self.grid.shape
         angle = self.angle
         angle_rad = np.deg2rad(angle)
-                
         # Get the last point seen by vision
         end_point = None
         
@@ -111,7 +111,7 @@ class Vision:
                 end_point = (i_end, width - 1)
             else:
                 end_point = (0, j_end)  
-                
+              
         return end_point
 
 
@@ -158,52 +158,41 @@ class Vision:
     
     def detect(self):
         visible_cells = self.look()
+        # Keep the first object of each class
+        nearest_cells = []
+        has_seen_object = np.full(len(Item) - 1, False)
         for cell in visible_cells:
             if not cell.is_empty():
+                # Is the class cell already be seen ?
+                if has_seen_object[cell.value] == False:
+                    has_seen_object[cell.value] = True
+                    nearest_cells.append(cell)
                 # Return cell containing first visible object
-                return cell
+        return nearest_cells
+                
         
-        # In practise, this part is not executed :
-        # The grid is padded with walls, and the center cell will detect them.
-        # However, for custom grids, this is used to prevent None return.
-            
-        # If sees nothing, return the center
-        if len(visible_cells) == 0:
-            return Cell(self.center, Item.EMPTY)
-        # Else return last empty cell
-        else:
-            return visible_cells[-1]
-        
-        
-    def to_one_hot(self):
+    def to_binary(self):
         # One-hot encoded vision
+        # Ignore empty cell
         num_class = len(Item) - 1
-        y = self.visible_object.value
-        return one_hot_vector(y, num_class)
+        binary_vision = np.zeros(num_class)
+        for cell in self.nearest_cells:
+            binary_vision[cell.value] = 1
+        return binary_vision
         
     
     def to_distances(self):
         # Ditance to walls | Distance to Apple | Distance to itself | etc.
         # Ignore empty cell
         num_class = len(Item) - 1
-        distances = np.zeros(num_class)
+        distance_vision = np.zeros(num_class)
+        for cell in self.nearest_cells:
+            distance_vector = (self.center.coord[0] - cell.coord[0],
+                               self.center.coord[1] - cell.coord[1])
+            distance = np.linalg.norm(distance_vector)
+            distance_vision[cell.value] = distance
         
-        # Distance to the wall
-        vector_wall = (self.center.coord[0] - self.end_cell.coord[0],
-                  self.center.coord[1] - self.end_cell.coord[1])
-        # Save the length / norm of the vector
-        # @NOTE : end_cell.value refers to the class of end_cell's item
-        distances[self.end_cell.value] = np.linalg.norm(vector_wall)
-        
-        # Distance to the visible object
-        if self.visible_object.item is not Item.WALL:
-            vector_object = (self.center.coord[0] - self.visible_object.coord[0],
-                             self.center.coord[1] - self.visible_object.coord[1])
-            distances[self.visible_object.value] = np.linalg.norm(vector_object)
-        
-        # distances /= np.linalg.norm((self.grid.shape[0] - 2, self.grid.shape[1] - 2))
-        
-        return distances
+        return distance_vision
         
            
     

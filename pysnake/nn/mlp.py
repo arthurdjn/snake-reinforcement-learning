@@ -7,7 +7,7 @@ import numpy as np
 from pysnake.nn.functional import softmax, relu
 
 
-class MLP(object):
+class NeuralNetwork(object):
     """
     Multi Layer Perceptron.
     """

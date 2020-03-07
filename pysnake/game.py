@@ -15,8 +15,9 @@ except ModuleNotFoundError:
 
 from pysnake.enum import Item, Direction
 from pysnake.grid import Cell, Grid
-from pysnake.snake import Snake, save_snake, load_snake
+from pysnake.snake import Snake
 from pysnake.windraw import WindowGame
+from pysnake.io import save_snake
 
 from pysnake.gen.population import Population
 from pysnake.nn.functional import softmax, relu, tanh, leaky_relu, linear
@@ -29,9 +30,8 @@ class Game:
         
         # Fix random numbers, use for debug mode
         self.seed = seed
-        if not seed is None:
-            np.random.seed(seed)
-            rd.seed(seed)
+        np.random.seed(seed)
+        rd.seed(seed)
         
         if grid is None:
             grid = Grid(shape)
@@ -42,7 +42,6 @@ class Game:
 
         self.snakes = []
         self.apples = []
-        self.shape = shape
               
         
     def add_snake(self, snake=None, **kwargs):
@@ -153,7 +152,8 @@ class GameApplication:
             "length": eval(config.get('Snake', 'length')),
             "vision_type": str(config.get('Snake', 'vision_type')),
             "vision_mode": eval(config.get('Snake', 'vision_mode')),
-            "max_lifespan": eval(config.get('Snake', 'max_lifespan')),
+            "lifespan_max": eval(config.get('Snake', 'lifespan_max')),
+            "hunger_max": eval(config.get('Snake', 'hunger_max')),
             # Neural Network
             "nn_hidden_layers": eval(config.get('NeuralNetwork', 'hidden_layers')),
             # self.activation_hidden = eval(config.get('NeuralNetwork', 'activation_hidden')),
@@ -162,6 +162,8 @@ class GameApplication:
                             
         # Genetic Algorithm
         # -----------------
+        # Initial Population
+        
         # Saving
         self.save_best_individuals = eval(config.get('GeneticAlgorithm', 'save_best_individuals'))
         self.save_generations = eval(config.get('GeneticAlgorithm', 'save_generations'))
@@ -212,6 +214,13 @@ class GameApplication:
         # Show the grid
         elif keys[pygame.K_g]:
             self.show_grid = not self.show_grid
+        # Restart a game
+        elif keys[pygame.K_r]:
+            self._pause = True
+            self.game.seed = snake.seed
+            snake.kill()
+            snake = Snake(self.game, **snake.get_params())
+            self.game.start(snake)
         # Increasing / Decreasing the fps
         elif keys[pygame.K_KP_PLUS]:
             self.fps_play += 1
@@ -221,14 +230,21 @@ class GameApplication:
             self.fps_train -= 1
                        
 
-    def play(self, params=None):      
+    def play(self, snake=None):      
+        
+        # Custom environment
+        # self.game.grid.set_wall((0, 1), (2, 3), (2, 4))
+        
         # Make sure you can play the game
         run_ai = True
-        if params is None:
-            params = self.snake_params
+        if snake is None:
+            snake = Snake(self.game, **self.snake_params) 
             run_ai = False
-        snake = Snake(self.game, **params) 
+        else:
+            snake.game = self.game
         self.game.start(snake)
+        # Init the activation output for the visuals
+        snake.next_direction()
             
         # Run the game until the end
         self._run = True
@@ -246,29 +262,46 @@ class GameApplication:
                 if run_ai:
                     next_direction = snake.next_direction()
                     snake.direction = next_direction
+                # Always move the snake
                 is_alive = snake.move()
+                # Update the network for visuals
+                snake.next_direction()  
                 
+                # Restart
                 if not is_alive:
-                    snake = Snake(self.game, **params)
+                    print("----------------")
+                    print("You died!")
+                    print("Score    : {}".format(snake.score))
+                    print("Lifespan : {}".format(snake.lifespan))
+                    # Restart a game with the same config / seed / params
+                    self.game.seed = snake.seed
+                    snake = Snake(self.game, **snake.get_params())
                     self.game.start(snake)
+                    # Pause the game at first
                     self._pause = True
                     
     
-    def train(self):
+    def train(self, population=None):
         fitness = []  # For tracking average fitness over generation
+        # Always fix the seed for training
+        if self.seed is None:
+            self.seed = 0
         
         # Create and initialize the population
-        individuals = [Snake(Game(self.board_size), **self.snake_params) for i in range(self.num_population)]                
-        population = Population(individuals)
+        if population is None:
+            individuals = [Snake(Game(self.board_size, seed=self.seed+i), **self.snake_params) for i in range(self.num_population)]                
+            population = Population(individuals)
                
         for generation in range(self.num_generations):
             next_individuals = []  # For setting next population
             
             # Play all snakes in their games environment
-            for i in range(self.num_population):
+            for i in range(self.num_population):                
                 chromosomes = population.individuals[i].chromosomes
                 snake = Snake(self.game, chromosomes=chromosomes, **self.snake_params)
                 self.game.start(snake)
+                # Init activation output for visuals
+                snake.next_direction()  
                 
                 # Run the game until the end
                 is_alive = True
@@ -284,8 +317,7 @@ class GameApplication:
                         self.clock.tick(self.fps_train)   
 
                     if not self._pause:
-                        next_direction = snake.next_direction()
-                        snake.direction = next_direction
+                        snake.direction = snake.next_direction()
                         is_alive = snake.move()
                         
                         if not is_alive:
@@ -293,13 +325,17 @@ class GameApplication:
                             snake.calculate_fitness()
                             population.individuals[i] = snake  
                             self.game.clean()
+                            # Update the seed
+                            if self.seed is not None:
+                                self.seed += 1
+                                self.game.seed = self.seed
             
             # Save ?
             if self.save_best_individuals and generation % self.save_steps == 0:
                 dirpath = self.save_dir + os.sep + "fittest"
                 filename = "snake_" + str(generation) + ".json"
                 save_snake(population.fittest, filename, dirpath = dirpath)
-                
+
             if self.save_generations and generation % self.save_steps == 0:
                 dirpath = self.save_dir + os.sep + "generation_" + str(generation)
                 for (i, snake) in enumerate(population.individuals):
@@ -350,11 +386,18 @@ class GameApplication:
                         
         return population, fitness
     
-    
+        
     
     
 
-
+if __name__ == "__main__":
+    import configparser
+    
+    config_file = "../config.ini"
+    config = configparser.ConfigParser()
+    config.read(config_file)
+    snake_game = GameApplication(config)
+    snake_game.play()
 
 
 

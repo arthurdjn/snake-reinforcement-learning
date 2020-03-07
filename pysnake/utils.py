@@ -52,3 +52,8 @@ def load_params(filename):
         params['nn_params'][key] = np.array(param)
     
     return params
+
+
+
+
+

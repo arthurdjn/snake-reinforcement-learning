@@ -8,8 +8,7 @@ from argparse import ArgumentParser
 
 from pysnake.game import GameApplication
 from pysnake.snake import Snake
-from pysnake.utils import load_params
-
+from pysnake.io import load_params, load_population, load_snake
     
 
 
@@ -20,13 +19,19 @@ if __name__ == "__main__":
                         type=str, default="pysnake/config.ini")
     parser.add_argument('--mode', help="Mode used, either to play or train snakes", action='store',
                         type=str, default='play')
-    parser.add_argument('--loadsnake', help="Load a snake in json format and add it to a game",
+    parser.add_argument('--snake', help="Load a snake in json format and add it to a new game.",
+                        type=str, default=None)
+    parser.add_argument('--replay', help="Replay a snake game.",
+                        type=str, default=None)
+    parser.add_argument('--population', help="Train from an existing population.",
                         type=str, default=None)
     # Get the arguments    
     args = parser.parse_args()
     config_file = args.config
     mode = args.mode.lower()
-    loadsnake = args.loadsnake
+    snake_file = args.snake
+    snake_replay_file = args.replay
+    population_file = args.population
     
     # Load the game
     config = configparser.ConfigParser()
@@ -41,15 +46,21 @@ if __name__ == "__main__":
     print("\tRIGHT \t\t\t: Right arrow")
     print("Optional")
     print("\tShow snake's vision \t: V")
-    print("\tShow the grid      \t: G")
-    print("\tIncrease the fps   \t: +")
-    print("\tDecrease the fps   \t: -")
+    print("\tShow the grid       \t: G")
+    print("\tIncrease the fps    \t: +")
+    print("\tDecrease the fps    \t: -")
         
     snake_game = GameApplication(config)
     
-    if type(loadsnake) is str:
-        params = load_params(loadsnake)
-        snake_game.play(params)
+    if snake_file is not None:
+        snake = load_snake(snake_file, keepseed=False)
+        snake_game.play(snake)
+    elif snake_replay_file is not None:
+        snake = load_snake(snake_replay_file, keepseed=True)
+        snake_game.play(snake)
+    elif population_file is not None:
+        population = load_population(population_file)
+        snake_game.train(population_file)
     elif mode == 'play':
         snake_game.play()
     else:       
