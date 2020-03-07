@@ -1,4 +1,4 @@
-![GitHub](https://img.shields.io/github/license/arthurdjn/pysnake) ![GitHub last commit (branch)](https://img.shields.io/github/last-commit/arthurdjn/pysnake/master) ![GitHub issues](https://img.shields.io/github/issues/arthurdjn/pysnake) 
+![GitHub](https://img.shields.io/github/license/arthurdjn/pysnake) ![GitHub last commit (branch)](https://img.shields.io/github/last-commit/arthurdjn/pysnake/master)
 
 
 # PySnake
