@@ -12,11 +12,14 @@ class Individual(ABC):
     
     Attributes
     ----------
-    chromosom : numpy.ndarray
-    fitness : float
     id : int
+        Identifiant of the individual, to keep track of the mutated agents
+        in the genetic algorithm.
+    chromosomes : list(pysnake.gen.chromosome.Chromosome)
+        List of chromosomes defining its behavior.
+    fitness : float
+        Reward of the individual. How well did the individual performed ?
     """
-    
     
     def __init__(self, chromosomes=None, id=None):
         
@@ -29,16 +32,59 @@ class Individual(ABC):
     # Methods
         
     def _init_chromosomes(self, chromosomes):
+        """
+        Initialize chromosomes or encode them.
+
+        Parameters
+        ----------
+        chromosomes : list(pysnake.gen.chromosome.Chromosome)
+            Chromosomes to encode if None.
+
+        Returns
+        -------
+        list(pysnake.gen.chromosome.Chromosome)
+            List of encoded chromosomes.
+        """
         if chromosomes is not None :
             return chromosomes
         else:
             return self.encode_chromosomes()
         
+    # @DEPRECATED
     def mutate_gaussian(self, prob_mutation, mu=0, sigma=1):
+        """
+        Mutate the individuals genes regarding a gaussian law.
+
+        Parameters
+        ----------
+        prob_mutation : float
+            Probability that a gene mutate.
+        mu : float, optional
+            Mean of the gaussian law. The default is 0.
+        sigma : float, optional
+            Standard deviation of the gaussian law. The default is 1.
+
+        Returns
+        -------
+        None.
+        """
+        print("This method is deprecated. Use .mutate() instead.")
         for chromosome in self.chromosomes:
             chromosome.mutate_gaussian(prob_mutation, mu=mu, sigma=sigma)
             
     def mutate(self, prob_mutation):
+        """
+        Mutate chromosomes.
+
+        Parameters
+        ----------
+        prob_mutation : float
+            Probability that a gene in a chromosome mutate.
+
+        Returns
+        -------
+        None.
+        """
         for chromosome in self.chromosomes:
             chromosome.mutate(prob_mutation)
         

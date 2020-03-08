@@ -3,16 +3,17 @@
 # @author: arthurd
 
 
-# Import pygame if installed
-# If not, it is still possible to train the model, without visualization
+# Import pygame if installed.
+# If not, it is still possible to train the model but without visualization.
 try:
     import pygame
     from pygame import gfxdraw
 except ModuleNotFoundError:
     print("Module PyGame is not installed.")
 
-# Dependent packages
+# Useful packages
 import numpy as np
+# PySnake modules
 from pysnake.enum import Item
 
 
@@ -65,16 +66,24 @@ class WindowGame:
         
 
     def _draw_vision(self):
+        """
+        Draw the full vision sensor for all snakes in the game.
+
+        Returns
+        -------
+        None.
+        """
         j0, i0, _, _ = self.bbox_game
         # Draw the vision for all snakes
         for snake in self.game.snakes:
             for num_vision, vision in enumerate(snake.full_vision):
                 
-                # Draw the visible_object
-                i, j = vision.visible_object.coord
-                if  vision.visible_object.item is Item.APPLE:
+                # Draw the first_visible_item
+                first_visible_item = vision.nearest_cells[0]
+                i, j = first_visible_item.coord
+                if  first_visible_item.item is Item.APPLE:
                     color = self.color_palette['visible_apple']
-                elif vision.visible_object.item is Item.SNAKE:
+                elif first_visible_item.item is Item.SNAKE:
                     color = self.color_palette['visible_snake']
                 else:
                     color = self.color_palette['empty']
@@ -84,9 +93,9 @@ class WindowGame:
                 
                 # Set the vision's color regarding the visible object
                 color = self.color_palette['vision']
-                if vision.visible_object.item is Item.APPLE:
+                if first_visible_item.item is Item.APPLE:
                     color = self.color_palette['vision_apple']
-                elif vision.visible_object.item is Item.SNAKE:
+                elif first_visible_item.item is Item.SNAKE:
                     color = self.color_palette['vision_snake']
                 
                 # Draw a line from the center to the last object (usually wall)
@@ -100,6 +109,18 @@ class WindowGame:
 
             
     def _draw_game(self, show_grid):
+        """
+        Draw the game's grid.
+
+        Parameters
+        ----------
+        show_grid : bool
+            Draw a grid.
+
+        Returns
+        -------
+        None.
+        """
         # Get the parameters
         game = self.game
         grid = game.grid
@@ -150,6 +171,13 @@ class WindowGame:
             
     
     def _draw_neurons(self):
+        """
+        Draw neurons of the last added snake to the game.
+
+        Returns
+        -------
+        None.
+        """
         # Origin on where to draw the network
         j0, i0, width, height = self.bbox_network
         color = self.color_palette["neuron"]
@@ -191,6 +219,13 @@ class WindowGame:
             
     
     def _draw_weights(self):
+        """
+        Draw weights of the last added snake to the game.
+
+        Returns
+        -------
+        None.
+        """
         # Origin on where to draw the network
         j0, i0, width, height = self.bbox_network
        

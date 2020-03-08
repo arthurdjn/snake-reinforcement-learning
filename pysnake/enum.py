@@ -6,6 +6,9 @@ from enum import Enum
 
 
 class Direction(Enum):
+    """
+    Enumerate all four directions.
+    """
     # In degrees
     # Origin is toward the North
     UP    = 0
@@ -15,13 +18,17 @@ class Direction(Enum):
 
 
 class Item(Enum):
+    """
+    Enumerate all items in the game.
+    """
+    # For one-hot encoded vectors simplification
+    EMPTY = -1
+    # Non-empty items values should start at 0
     WALL  = 0
     SNAKE = 1
     APPLE = 2
     
-    # Empty MUST have the last index
-    # For one-hot encoded vectors simplification
-    EMPTY = 3
+
 
 
 

@@ -19,14 +19,23 @@ class Population:
     
     Attributes
     ----------
+    id : int
+        Identifiant of the population.
     size : int
-    
-    
+        Number of individuals in the population.
+    individuals : list(pysnake.gen.individual.Individual)
+        List of individual.
+    fitness : list(float)
+        Fitness list of all individuals.
+    mean_fitness : float
+        Fitness mean of all individuals.
+    std_fitness : float
+        Fitness standard deviation of all individuals.
+    fittest : pysnake.gen.individual.Individual
+        Best individual, with the highest fitnest.
     """
     
-    
-    def __init__(self, individuals, id = None):
-        
+    def __init__(self, individuals, id = None):        
         # @NOTE :
         # individuals must be set first
         self.individuals = individuals
@@ -42,16 +51,49 @@ class Population:
     # Methods
         
     def calculate_fitness(self):
+        """
+        Calculate the fitness for all individuals.
+
+        Returns
+        -------
+        None.
+        """
         for individual in self.individuals:
             individual.calculate_fitness()
             
             
     def select_elitism(self, num_individuals):
+        """
+        Select the top X best individuals.
+
+        Parameters
+        ----------
+        num_individuals : int
+            Top X individuals to select.
+
+        Returns
+        -------
+        list(pysnake.gen.individual.Individual)
+            List of the top X individuals.
+        """
         individuals = sorted(self.individuals, key = lambda individual: individual.fitness, reverse=True)
         return individuals[:num_individuals]
     
     
     def select_roulette_wheel(self, num_individuals):
+        """
+        Select individuals in a roulette wheel game.
+
+        Parameters
+        ----------
+        num_individuals : int
+            Number of individuals to select.
+
+        Returns
+        -------
+        list(pysnake.gen.individual.Individual)
+            List of the selected individuals.
+        """
         selection = []
         wheel = np.sum(individual.fitness for individual in self.individuals)
         for _ in range(num_individuals):
@@ -67,6 +109,21 @@ class Population:
     
         
     def select_tournament(self, num_individuals, tournament_size):
+        """
+        Select the best individuals in a sub list of individuals X times.
+
+        Parameters
+        ----------
+        num_individuals : int
+            Number of individuals to select.
+        tournament_size : int
+            Size of the competitive tournament.
+
+        Returns
+        -------
+       list(pysnake.gen.individual.Individual)
+            List of the selected individuals.
+        """
         selection = []
         for _ in range(num_individuals):
             tournament = np.random.choice(self.individuals, tournament_size)
@@ -78,7 +135,6 @@ class Population:
     
     def crossover_simulated_binary(self, parent1, parent2, eta=100):
         
-        # Calculate Gamma (Eq. 9.11)
         assert parent1.size == parent2.size, ("The parents must have the same number of chromosomes.")
         
         chromosomes1 = []
@@ -157,6 +213,7 @@ class Population:
                 
         return chromosomes1, chromosomes2
 
+
     # -------------------------------------------------------------------------
     # Getters and setters
 
@@ -168,15 +225,6 @@ class Population:
     def size(self, value):
         raise AttributeError("attribute 'size' of 'Population' objects is not writable.",
                              "Change attribute 'individuals' instead.")
-
-    # @property
-    # def num_genes(self):
-    #     return self.individuals[0].chromosome.shape[1]
-
-    # @num_genes.setter
-    # def num_genes(self, value):
-    #     raise AttributeError("attribute 'num_genes' of 'Population' objects is not writable.",
-    #                          "Change attribute 'individuals' instead.")
 
     @property
     def fitness(self):
@@ -235,7 +283,6 @@ class Population:
         string += "  mean fit: {0}\n".format(self.mean_fitness)
         string += "   std fit: {0}\n".format(self.std_fitness)
         string += "   fittest: {0}".format(self.fittest.fitness)
-        
         
         return string
     

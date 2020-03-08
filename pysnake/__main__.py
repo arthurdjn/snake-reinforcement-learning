@@ -16,7 +16,7 @@ if __name__ == "__main__":
     
     parser = ArgumentParser()
     parser.add_argument('--config', help="Path to the config.ini file", action='store',
-                        type=str, default="pysnake/config.ini")
+                        type=str, default="config.ini")
     parser.add_argument('--mode', help="Mode used, either to play or train snakes", action='store',
                         type=str, default='play')
     parser.add_argument('--snake', help="Load a snake in json format and add it to a new game.",
@@ -40,15 +40,16 @@ if __name__ == "__main__":
     
     # Keys
     print("\nDirections")
-    print("\tUP \t\t\t: Up arrow")
-    print("\tLEFT \t\t\t: Left arrow")
-    print("\tDOWN \t\t\t: Down arrow")
-    print("\tRIGHT \t\t\t: Right arrow")
+    print("\tUP                     : Up    arrow")
+    print("\tLEFT                   : Left  arrow")
+    print("\tDOWN                   : Down  arrow")
+    print("\tRIGHT                  : Right arrow")
     print("Optional")
-    print("\tShow snake's vision \t: V")
-    print("\tShow the grid       \t: G")
-    print("\tIncrease the fps    \t: +")
-    print("\tDecrease the fps    \t: -")
+    print("\tRestart                : R")
+    print("\tShow snake's vision    : V")
+    print("\tShow the grid          : G")
+    print("\tIncrease the fps       : +")
+    print("\tDecrease the fps       : -")
         
     snake_game = GameApplication(config)
     

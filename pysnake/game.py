@@ -3,26 +3,46 @@
 # @author: arthurd
 
 
+# Useful packages
 import os
 import numpy as np
 import random as rd
-
+# Test if pygame is installed
 try:
     import pygame
 except ModuleNotFoundError:
-    print("Module PyGame is not installed.")
+    print("Module PyGame is not installed.\nEither install this package or turn off the 'render' parameter in the config.ini file.")
 
-
+# PySnake modules
 from pysnake.enum import Item, Direction
 from pysnake.grid import Cell, Grid
 from pysnake.snake import Snake
 from pysnake.windraw import WindowGame
 from pysnake.io import save_snake
-
+# Neural Network and Genetic Algorithm
 from pysnake.gen.population import Population
 from pysnake.nn.functional import softmax, relu, tanh, leaky_relu, linear
 
+
+
 class Game:
+    """
+    Game board. This class interracts with the grid, snake(s), apple(s) and all
+    elements used in the snake game. It does not depends on pysnake.
+    
+    Attributes
+    ----------
+    seed: int
+        Fix random numbers.
+    grid: pysnake.grid.Grid
+        Grid containing cells (apples, snake(s)...).
+    shape: tuple(int, int)
+        Shape of the grid.
+    snakes: list(pysnake.snake.Snake)
+        List of all snakes in the game.
+    apples: list(pysnake.grid.Cell)
+        List of apple cells in the game.
+    """
     
     def __init__(self, shape=None, grid=None, seed=None):
         
@@ -45,16 +65,40 @@ class Game:
               
         
     def add_snake(self, snake=None, **kwargs):
+        """
+        Add a snake to the game.
+
+        Parameters
+        ----------
+        snake : pysnake.snake.Snake, optional
+            Snake to add to the current game. The default is None.
+        **kwargs : snake parameters
+            Specify to create a snake using these parameters.
+
+        Returns
+        -------
+        None.
+        """
         if snake is None:
             snake = Snake(self, **kwargs)
         else:
+            # Update the snake to the game
             snake.game = self
             snake.full_vision.grid = self.grid
+            snake.next_direction()
+        # Add the snake to the game
         self.snakes.append(snake)
         self.grid.set_cell(*snake.body)
     
     
     def add_apple(self):
+        """
+        Add a new apple in the game.
+
+        Returns
+        -------
+        None.
+        """
         apple = self.generate_apple()
         self.apples.append(apple)
         # Update the grid
@@ -62,7 +106,14 @@ class Game:
       
         
     def generate_apple(self):
-               
+        """
+        Generate an apple at an availble cell randomly.
+
+        Returns
+        -------
+        apple : pysnake.grid.Cell
+            Cell containing the new apple.
+        """
         height, width = self.shape
         available_coord = []
         
@@ -82,6 +133,13 @@ class Game:
         
     
     def clean(self):
+        """
+        Clean the game from previous state (snakes and apples).
+
+        Returns
+        -------
+        None.
+        """
         # Kill the snakes
         for snake in self.snakes:
             snake.kill()
@@ -93,6 +151,20 @@ class Game:
         
 
     def start(self, snake=None, **kwargs):
+        """
+        (Re)Start a game
+
+        Parameters
+        ----------
+        snake : pysnake.snake.Snake, optional
+            Snake used to start a new game. The default is None.
+        **kwargs : parameters
+            Custom parameters to initialize the snake.
+
+        Returns
+        -------
+        None.
+        """
         self.clean()
         self.add_snake(snake, **kwargs)
         self.add_apple()     
@@ -102,11 +174,20 @@ class Game:
 
 
 class GameApplication:
+    """
+    Game application, interacting with the user. This class is used to play 
+    and train snakes.
+    
+    Attributes
+    ----------
+    
+    """
+    
     
     def __init__(self, config):
 
         # Main Game
-        # ----
+        # ---------
         self.board_size = eval(config.get('Game', 'board_size'))
         self.seed = eval(config.get('Game', 'seed'))
         self.game = Game(self.board_size, seed = self.seed)
@@ -161,9 +242,7 @@ class GameApplication:
             }
                             
         # Genetic Algorithm
-        # -----------------
-        # Initial Population
-        
+        # -----------------       
         # Saving
         self.save_best_individuals = eval(config.get('GeneticAlgorithm', 'save_best_individuals'))
         self.save_generations = eval(config.get('GeneticAlgorithm', 'save_generations'))
@@ -185,12 +264,26 @@ class GameApplication:
         
 
     def _player_controler(self, snake):
+        """
+        Key listener. Interaction machine - user.
+
+        Parameters
+        ----------
+        snake : pysnake.snake.Snake
+            The snake to interact with.
+
+        Returns
+        -------
+        snake : pysnake.snake.Snake
+            The modified (or new) snake.
+        """
         # Quit
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self._run = False
                 pygame.quit()
                 quit()
+        
         # Update the direction
         keys = pygame.key.get_pressed()
         if keys[pygame.K_UP]:
@@ -205,22 +298,26 @@ class GameApplication:
         elif keys[pygame.K_LEFT]:
             snake.direction = Direction.LEFT
             self._pause = False
+        
         # Pause the game
         elif keys[pygame.K_SPACE]:
             self._pause = not self._pause
-        # Show the vision
-        elif keys[pygame.K_v]:
-            self.show_vision = not self.show_vision
-        # Show the grid
-        elif keys[pygame.K_g]:
-            self.show_grid = not self.show_grid
-        # Restart a game
+            
+       # Restart a game
         elif keys[pygame.K_r]:
             self._pause = True
             self.game.seed = snake.seed
-            snake.kill()
             snake = Snake(self.game, **snake.get_params())
             self.game.start(snake)
+        
+        # Show the vision
+        elif keys[pygame.K_v]:
+            self.show_vision = not self.show_vision
+        
+        # Show the grid
+        elif keys[pygame.K_g]:
+            self.show_grid = not self.show_grid
+                
         # Increasing / Decreasing the fps
         elif keys[pygame.K_KP_PLUS]:
             self.fps_play += 1
@@ -228,10 +325,23 @@ class GameApplication:
         elif keys[pygame.K_KP_MINUS]:
             self.fps_play -= 1
             self.fps_train -= 1
+            
+        return snake
                        
 
     def play(self, snake=None):      
-        
+        """
+        Playble snake game.
+
+        Parameters
+        ----------
+        snake : pysnake.snake.Snake, optional
+            Initial snake. The default is None.
+
+        Returns
+        -------
+        None.
+        """
         # Custom environment
         # self.game.grid.set_wall((0, 1), (2, 3), (2, 4))
         
@@ -255,7 +365,7 @@ class GameApplication:
                 self.window_game.draw(show_grid=self.show_grid, show_vision=self.show_vision)
                 self.clock.tick(self.fps_play)
                 # Player controler
-                self._player_controler(snake)
+                snake = self._player_controler(snake)
                                     
             # Always move the snake if not paused
             if not self._pause:
@@ -282,6 +392,22 @@ class GameApplication:
                     
     
     def train(self, population=None):
+        """
+        Train a range of snakes and evolve them.
+
+        Parameters
+        ----------
+        population : pysnake.gen.population.Population, optional
+            Initial population to start from. The default is None.
+
+        Returns
+        -------
+        population : pysnake.gen.population.Population
+            Last evolved population.
+        fitness : list(float)
+            Fitness of all best individuals from the initial population to 
+            the last one.
+        """
         fitness = []  # For tracking average fitness over generation
         # Always fix the seed for training
         if self.seed is None:
@@ -345,10 +471,10 @@ class GameApplication:
             
             # Display a log each generations
             print("----------------------")
-            print("Generation :{0:4d}/{1}".format(generation + 1, self.num_generations), end = " | ")
-            print("best fitness : {0:2.3E}".format(population.fittest.fitness), end = " | ")
-            print("best score : {0:2d}".format(population.fittest.score), end = " | ")
-            print("lifespan : {0:3d}".format( population.fittest.lifespan), end = " | ")
+            print("Generation  : {0:4d}/{1}".format(generation + 1, self.num_generations), end = " | ")
+            print("best fitness: {0:2.3E}".format(population.fittest.fitness), end = " | ")
+            print("best score  : {0:2d}".format(population.fittest.score), end = " | ")
+            print("lifespan    : {0:3d}".format( population.fittest.lifespan), end = " | ")
             
             # Get best individuals from current pop
             best_from_pop = population.select_elitism(self.num_parents)
@@ -380,8 +506,11 @@ class GameApplication:
     
             # Set the next generation
             population.individuals = next_individuals
-            
-        print("\n\nBest individual :\n")
+             
+        print("======================")
+        print("Done !")
+        print("Best fitness : {}".format(population.fittest.fitness))
+        print("Best individual :\n")
         print(population.fittest)
                         
         return population, fitness
@@ -391,8 +520,10 @@ class GameApplication:
     
 
 if __name__ == "__main__":
-    import configparser
     
+    # Test the game
+    import configparser
+    # Load the config
     config_file = "../config.ini"
     config = configparser.ConfigParser()
     config.read(config_file)

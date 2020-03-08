@@ -3,9 +3,11 @@
 # @author: arthurd
 
 
+# Useful packages
 import os
 import json
 import numpy as np
+# PySnake modules
 from pysnake.snake import Snake
 import pysnake.game
 from pysnake.gen.population import Population
@@ -24,11 +26,6 @@ def open_files(dir_path, ext="json"):
     ext : string, optional
         The files extension you want to open. The default is "json".
 
-    Raises
-    ------
-    FileNotFoundError
-        If the directory is not found, it raises this issue.
-
     Returns
     -------
     list
@@ -38,20 +35,19 @@ def open_files(dir_path, ext="json"):
 
     Example
     -------
-        >>> dir_name = "path/to/your/directory"
+        >>> dir_name = "saves/generation_0"
         >>> files = open_files(dir_name, ext="geojson")
         >>> files
-            ['../saves/snake_1.json',
-             '../saves/snake_2.json',
-             '../saves/snake_3.json',
+            ['saves/generation_0/snake_1.json',
+             'saves/generation_0/snake_2.json',
+             'saves/generation_0/snake_3.json',
              #...
-             '../saves/snake_1000.json']
+             'saves/generation_0/snake_1499.json']
     """
     try :
         ls = os.listdir(dir_path)
     except FileNotFoundError :
-        print("\nWarning: \nThe directory was not found.")
-        raise FileNotFoundError
+        raise FileNotFoundError("directory not found")
     files_list = []
     for f in ls :
         if f.endswith(ext):
@@ -60,8 +56,24 @@ def open_files(dir_path, ext="json"):
     return files_list
 
 
-
 def save_snake(snake, filename, dirpath = '.'):
+    """
+    Save a Snake in json format.
+
+    Parameters
+    ----------
+    snake : pysnake.snake.Snake
+        Snake to save.
+    filename : str
+        Name of the file.
+    dirpath : str, optional
+        Path to the directory to save the file.
+        The default is '.'.
+
+    Returns
+    -------
+    None.
+    """
     data = {'id': snake.id,
             'game_shape': snake.game.shape,
             'seed': snake.seed,
@@ -94,9 +106,27 @@ def save_snake(snake, filename, dirpath = '.'):
     with open(dirpath + os.sep + filename, 'w') as f:
         json.dump(data, f)   
 
-    
-    
+        
 def load_snake(filename, game=None, keepseed=True):
+    """
+    Load a Snake from a json file.
+
+    Parameters
+    ----------
+    filename : str
+        Name of the file to open.
+    game : pysnake.game.Game, optional
+        Game in which to add the Snake.
+        The default is None.
+    keepseed : bool, optional
+        Load the Snake with seed, for Game and Snake. 
+        The default is True.
+
+    Returns
+    -------
+    snake : pysnake.snake.Snake
+        Loaded Snake.
+    """
     # Open the file
     with open(filename) as f:
         data = json.load(f)
@@ -128,12 +158,23 @@ def load_snake(filename, game=None, keepseed=True):
     return snake
 
 
-
-
-
-
-
 def load_params(filename):
+    """
+    Load only Neural Network params from a snake json file.
+
+    Parameters
+    ----------
+    filename : str
+        Name of the file to load.
+
+    Returns
+    -------
+    params : dict
+        Neural Network params for weights, biases and activation outputs.
+        - W_{i}: weights,
+        - b_{i}: biases,
+        - A_{i}: activation outputs.
+    """
     # Open the file
     with open(filename) as f:
         data = json.load(f)
@@ -151,10 +192,23 @@ def load_params(filename):
     return params
 
 
-
-
-
 def load_population(dirpath, game=None):
+    """
+    Load a population made of snake json files in a directory.
+
+    Parameters
+    ----------
+    dirpath : str
+        Path to the directory in which all individuals are saved in a json format.
+    game : pysnake.game.Game, optional
+        Game in which to add the population. 
+        The default is None.
+
+    Returns
+    -------
+    pysnake.gen.population.Population
+        Loaded population.
+    """
     individuals = []
     files = open_files(dirpath, ext='json')
     for file in files:

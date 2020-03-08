@@ -12,13 +12,13 @@ import json
 
 
 # Extract coordinates from cells
-def cell_to_coord(*cells):
+def cell2coord(*cells):
     return [cell.coord for cell in cells]
 
-def cell_to_name(*cells):
+def cell2name(*cells):
     return [cell.name for cell in cells]
 
-def cell_to_item(*cells):
+def cell2item(*cells):
     return [cell.item for cell in cells]
 
 

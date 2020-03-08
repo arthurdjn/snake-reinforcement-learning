@@ -3,17 +3,55 @@
 # @author: arthurd
 
 
-
+# Useful packages
 import numpy as np
-
+# PySnake modules
 from pysnake.enum import Item
-from pysnake.grid import Cell
-
-from pysnake.utils import one_hot_vector
 
 
 
 class Vision:
+    """
+    Sensor detecting items in a grid.
+    
+    Attributes
+    ----------
+    grid: pysnake.grid.Grid
+        Grid containing cells and items.
+    angle: int
+        Angle from the bearing orientation (0 = North).
+    max_length: int
+        Maximal length of a ray sensor (in cell)
+    end_point: tuple(float, float)
+        True coordinates of the last extremity of the ray sensor.
+    end_cell: pysnake.grid.Cell
+        Cell where belongs the end_point.
+    nearest_cells: list(pysnake.grid.Cell)
+        List of nearest cells for each category (wall, snake, apple).
+        The first index is the nearest object regarldess the item type.
+        
+    Example
+    -------
+            # First create a grid of shape (15, 15)
+        >>> grid = Grid((15, 15))
+            # Get the center of the vision sensor
+        >>> center = grid[5, 5]
+        >>> vision = Vision(grid, center, angle=45)
+        >>> visible_cells = vision.look()
+        >>> visible_cells
+            [<pysnake.grid.Cell at 0x2015dcf6488>,
+             <pysnake.grid.Cell at 0x2015dcf6088>,
+             <pysnake.grid.Cell at 0x2015dd09708>,
+             <pysnake.grid.Cell at 0x2015dcff988>,
+             <pysnake.grid.Cell at 0x2015dcced88>]
+            # These cells are all visible cells from center at 45° angle from
+            # the North.
+        >>> from pysnake.utils impory cell2coord, cell2name
+        >>> cell2coord(*visible_cells)
+            [(4, 4), (3, 3), (2, 2), (1, 1), (0, 0)]
+        >>> cell2name(*visible_cells)
+            ['EMPTY', 'EMPTY', 'EMPTY', 'EMPTY', 'EMPTY']
+    """
     
     def __init__(self, grid, center, angle=0, max_length=None):
         
@@ -26,14 +64,9 @@ class Vision:
         self.end_point = self._get_end_point()
         self.end_cell = self.grid[int(self.end_point[0]), int(self.end_point[1])]
         
-        
         # Visibe item from its vision
-        self.visible_object = self.detect()[0]
         self.nearest_cells = self.detect()
-        
-        # Distances vector : distance from the walls, to apple, to itself
-        # self.distances = self.to_distances()     
-        
+                
     
     def _get_end_point(self):
         """
@@ -116,7 +149,17 @@ class Vision:
 
 
     def look(self):
-        # print("WARNING:\nThis method is deprecated, use vision.look() instead.")
+        """
+        Look for all cells intersecting the vision's ray (line) defined
+        from center.coord to end_point.
+        
+
+        Returns
+        -------
+        visible_cells : list(pysnake.grid.Cell)
+            List of all cells contained in the vision. This list contains
+            items like apples, snakes, walls, but empty items too.
+        """
         # Star and end points
         start_i, start_j = self.center.coord
         end_i, end_j = self.end_point
@@ -157,6 +200,15 @@ class Vision:
             
     
     def detect(self):
+        """
+        Detect from a visible cells the nearest items for each category.
+
+        Returns
+        -------
+        nearest_cells : list(pysnake.grid.Cell)
+        List of nearest cells for each category (wall, snake, apple).
+        The first index is the nearest object regarldess the item type.
+        """
         visible_cells = self.look()
         # Keep the first object of each class
         nearest_cells = []
@@ -172,6 +224,15 @@ class Vision:
                 
         
     def to_binary(self):
+        """
+        Convert the nearest cells to binary encoded vector.
+
+        Returns
+        -------
+        binary_vision : numpy.ndarray
+            Array of shape num_class (without taking into account empty cells),
+            where the value at index i is 1 if the class i is visible, 0 either.
+        """
         # One-hot encoded vision
         # Ignore empty cell
         num_class = len(Item) - 1
@@ -182,7 +243,16 @@ class Vision:
         
     
     def to_distances(self):
-        # Ditance to walls | Distance to Apple | Distance to itself | etc.
+        """
+        Convert the nearest cells to distances encoded vector.
+
+        Returns
+        -------
+        distance_vision : numpy.ndarray
+            Array of shape num_class (without taking into account empty cells),
+            where the value at index i is Norm_2(center.coord, value.coord)
+            if the class i is visible, 0 either.        
+        """
         # Ignore empty cell
         num_class = len(Item) - 1
         distance_vision = np.zeros(num_class)
@@ -197,21 +267,52 @@ class Vision:
            
     
 class FullVision:
+    """
+    LiDAR like sensor. This sensor groups vision oriented in different direction
+    at equal angle from one another.
+    
+    Attributes
+    ----------
+    grid: pysnake.grid.Grid
+        Grid containing all cells.
+    mode: int
+        Number of rays oriented at equal angle from one another to create.
+    center: pysnake.grid.Cell
+        Center of the sensor. This center is a cell in the grid.
+    max_length: int
+        Maximal length of the rays visions.
+    bearing: int
+        Angle from V0 to the North.
+    """
     
     def __init__(self, grid, center, bearing, max_length=None, mode=8):
         
+        # First add the grid
         self.grid = grid
-        
+        # Visions parameters
         self.mode = mode
         self.center = center
         self.max_length = max_length
         self.bearing = bearing
-        
+        # Create all visions objects
         self.visions = self._init_visions(self.bearing)
         
                 
     def _init_visions(self, bearing):
-               
+        """
+        Create a list of visions.
+
+        Parameters
+        ----------
+        bearing : int
+            Angle from V0 to the North.
+
+        Returns
+        -------
+        visions : list(pysnake.vision.Vision)
+            List of vision, from center. All vision objects are at equal angle
+            from one another.
+        """
         visions = []
         mode = self.mode
         # Create n_mode vision objects, with an equal angle theta from each other
@@ -227,15 +328,57 @@ class FullVision:
             
     
     def update(self, center, bearing):
+        """
+        Update state and visible cells of visions objects.
+
+        Parameters
+        ----------
+        center : pysnake.grid.Cell
+            New center of the FullVision sensor.
+        bearing : int
+            New angle from V0 to the North.
+
+        Returns
+        -------
+        None.
+        """
         self.center = center
         self.bearing = bearing
         self.visions = self._init_visions(bearing)
     
     
     def __getitem__(self, index):
+        """
+        Get a vision object from the full vision sensor.
+
+        Parameters
+        ----------
+        index : int
+            Index of the vision.
+
+        Returns
+        -------
+        vision: pysnake.vision.Vision
+            Vision at index 'index'.
+        """
         return self.visions[index]
     
+    
     def __setitem__(self, index, value):
+        """
+        Set a vision object from the full vision sensor.
+
+        Parameters
+        ----------
+        index : int
+            Index of the vision to modify.
+        value : pysnake.vision.Vision
+            New vision to set at index 'index'.
+
+        Returns
+        -------
+        None.
+        """
         self.visions[index] = value
     
     
