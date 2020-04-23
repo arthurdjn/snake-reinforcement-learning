@@ -129,7 +129,7 @@ class Snake(Individual):
         # Initialize the first activation (the value is used to display the neurons)
         self.next_direction()
         self.nn_params = self.nn.params
-        
+                
         # Create chromosomes from the Neural Networks's weights and bias
         chromosomes = self.encode_chromosomes()
         # Create an individual from chromosomes

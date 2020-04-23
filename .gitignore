@@ -130,6 +130,7 @@ dmypy.json
 
 
 # PySnake
+saves*
 saves/
 train.ini
 train.py

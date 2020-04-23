@@ -238,7 +238,13 @@ class Vision:
         num_class = len(Item) - 1
         binary_vision = np.zeros(num_class)
         for cell in self.nearest_cells:
-            binary_vision[cell.value] = 1
+            if cell.item is Item.WALL:
+                distance_vector = (self.center.coord[0] - cell.coord[0],
+                                   self.center.coord[1] - cell.coord[1])
+                distance = np.linalg.norm(distance_vector)
+                binary_vision[cell.value] = 1 / distance
+            else:
+                binary_vision[cell.value] = 1
         return binary_vision
         
     

@@ -16,7 +16,7 @@ if __name__ == "__main__":
     
     parser = ArgumentParser()
     parser.add_argument('--config', help="Path to the config.ini file", action='store',
-                        type=str, default="config.ini")
+                        type=str, default="pysnake/config.ini")
     parser.add_argument('--mode', help="Mode used, either to play or train snakes", action='store',
                         type=str, default='play')
     parser.add_argument('--snake', help="Load a snake in json format and add it to a new game.",

@@ -231,7 +231,7 @@ class GameApplication:
         # -------------------
         self.snake_params = {
             "length": eval(config.get('Snake', 'length')),
-            "vision_type": str(config.get('Snake', 'vision_type')),
+            "vision_type": eval(config.get('Snake', 'vision_type')),
             "vision_mode": eval(config.get('Snake', 'vision_mode')),
             "lifespan_max": eval(config.get('Snake', 'lifespan_max')),
             "hunger_max": eval(config.get('Snake', 'hunger_max')),
@@ -256,7 +256,7 @@ class GameApplication:
         self.eta_SBX = eval(config.get('GeneticAlgorithm', 'eta_SBX'))
         self.probability_SBX = eval(config.get('GeneticAlgorithm', 'probability_SBX'))
         self.probability_SPBX = eval(config.get('GeneticAlgorithm', 'probability_SPBX'))
-        self.crossover_selection_type = str(config.get('GeneticAlgorithm', 'crossover_selection_type'))
+        self.crossover_selection_type = eval(config.get('GeneticAlgorithm', 'crossover_selection_type'))
         self.mutation_rate = eval(config.get('GeneticAlgorithm', 'mutation_rate'))
         # self.mutation_rate_type = str(config.get('GeneticAlgorithm', 'mutation_rate_type'))
         self.gaussian_mu = eval(config.get('GeneticAlgorithm', 'gaussian_mu'))
@@ -302,6 +302,7 @@ class GameApplication:
         # Pause the game
         elif keys[pygame.K_SPACE]:
             self._pause = not self._pause
+            print(snake.compute_input())
             
        # Restart a game
         elif keys[pygame.K_r]:
@@ -366,7 +367,7 @@ class GameApplication:
                 self.clock.tick(self.fps_play)
                 # Player controler
                 snake = self._player_controler(snake)
-                                    
+
             # Always move the snake if not paused
             if not self._pause:
                 if run_ai:
