@@ -1,4 +1,4 @@
-![GitHub](https://img.shields.io/github/license/arthurdjn/pysnake) ![GitHub last commit (branch)](https://img.shields.io/github/last-commit/arthurdjn/pysnake/master) ![Website](https://img.shields.io/website?url=http%3A%2F%2Farthurdujardin.com%2Fproject%2Fpysnake.html)
+![GitHub](https://img.shields.io/github/license/arthurdjn/pysnake) ![GitHub last commit (branch)](https://img.shields.io/github/last-commit/arthurdjn/pysnake/master) [![Website](https://img.shields.io/website?url=http%3A%2F%2Farthurdujardin.com%2Fproject%2Fpysnake.html)](http://arthurdujardin.com/project/pysnake.html)
 
 
 # PySnake
