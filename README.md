@@ -1,8 +1,8 @@
 ![GitHub](https://img.shields.io/github/license/arthurdjn/pysnake) ![GitHub last commit (branch)](https://img.shields.io/github/last-commit/arthurdjn/pysnake/master) 
-[![Website](https://img.shields.io/website?url=http%3A%2F%2Farthurdujardin.com%2Fproject%2Fsnake.html)](http://arthurdujardin.com/project/snake.html)
+[![Website](https://img.shields.io/website?url=http%3A%2F%2Farthurdujardin.com%2Fproject%2Fsnake.html)](https://arthurdujardin.com/project/snake.html)
 
 
-# PySnake
+# AI plays Snake Game :snake:
 
 
 **PySnake** is an artificial intelligence that learns to control a snake. This AI learns to recognize its environment and choose the best direction to survive.
@@ -132,4 +132,4 @@ The snake's vision is composed of rays (lines) going from its head to the game b
 
 I started this project when I saw the [demonstration](https://www.youtube.com/watch?v=vhiO4WsHA6c) from [Chrisspresso](https://github.com/Chrispresso/SnakeAI).
 I read his [project page](https://chrispresso.io/AI_Learns_To_Play_Snake) and then wanted to create my own version.
-The arechitecture is somewhat similar, but the vision and game are coded differently.
+The architecture is somewhat similar, but the vision and game are coded differently. In addition, I added a web visualizer so anyone can play with the project :smiley: !
