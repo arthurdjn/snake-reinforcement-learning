@@ -5,6 +5,7 @@
 
 """
 Population set-up for genetic algorithm.
+Original code from https://github.com/Chrispresso/SnakeAI.
 """
 
 import numpy as np  
