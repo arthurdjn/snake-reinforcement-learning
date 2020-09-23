@@ -19,7 +19,7 @@ The snake dies when it eats itself or crash in a wall.
 
 ### SAGA
 
-[SAGA](https://documentation.sigma2.no/quick/saga.html) is a distributed memory system which consists of 244 dual/quad socket nodes, interconnected with a high-bandwidth low-latency InfiniBand network. The model has been trained on [SAGA](https://documentation.sigma2.no/quick/saga.html) servers with an access of 16GB ram and 8 nodes, through 3000 generations of 1500 snakes each.
+[SAGA](https://documentation.sigma2.no/quick/saga.html) is a distributed memory system which consists of 244 dual/quad socket nodes, interconnected with a high-bandwidth low-latency InfiniBand network. The model has been trained on [SAGA](https://documentation.sigma2.no/quick/saga.html) servers with an access of 16GB ram and 8 nodes, through 1000 generations of 1500 snakes each.
 
 ## Getting Started
 
