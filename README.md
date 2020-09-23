@@ -126,3 +126,10 @@ The snake's vision is composed of rays (lines) going from its head to the game b
   <img src="img/pysnake_vision.gif">
   <br>
 </p>
+
+
+# References
+
+I started this project when I saw the [demonstration](https://www.youtube.com/watch?v=vhiO4WsHA6c) from [Chrisspresso](https://github.com/Chrispresso/SnakeAI).
+I read his [project page](https://chrispresso.io/AI_Learns_To_Play_Snake) and then wanted to create my own version.
+The arechitecture is somewhat similar, but the vision and game are coded differently.
